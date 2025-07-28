@@ -10,6 +10,8 @@
 
 **Intelligence Artificielle de classification de chiffres manuscrits avec interface web interactive**
 
+> **📝 Note** : Ce projet utilise maintenant `MNIST_Training_clean.ipynb` - version optimisée avec hyperparamètres améliorés pour une meilleure accuracy.
+
 [🚀 Démo Live](#interface-web) • [📊 Performances](#performances) • [🛠️ Installation](#installation) • [📖 Documentation](#documentation)
 
 </div>
@@ -21,7 +23,7 @@ Ce projet implémente une **Intelligence Artificielle complète** pour la classi
 ### ✨ Fonctionnalités principales
 
 - 🧠 **Modèle CNN moderne** : Architecture convolutionnelle optimisée
-- 🎯 **Précision >95%** : Performance state-of-the-art sur MNIST  
+- 🎯 **Précision >98%** : Performance state-of-the-art sur MNIST (batch size optimisé)  
 - 🌐 **Interface web interactive** : Dessinez et obtenez des prédictions en temps réel
 - ⚡ **Inférence côté client** : Aucun serveur requis grâce à ONNX.js
 - 📱 **Design responsive** : Compatible mobile et desktop
@@ -31,7 +33,7 @@ Ce projet implémente une **Intelligence Artificielle complète** pour la classi
 
 ```
 Projet_1_Classification_MNIST/
-├── 📓 MNIST_Training.ipynb     # Notebook principal (entraînement complet)
+├── 📓 MNIST_Training_clean.ipynb     # Notebook principal (entraînement complet)
 ├── 🌐 web/
 │   ├── index.html              # Interface web interactive
 │   └── mnist_model.onnx        # Modèle exporté (3.3MB)
@@ -48,7 +50,7 @@ Projet_1_Classification_MNIST/
 
 | Métrique | Valeur | Status |
 |----------|--------|---------|
-| **Accuracy Test** | **>95%** | ✅ |
+| **Accuracy Test** | **>98%** | ✅ |
 | **Temps d'entraînement** | ~5 minutes | ⚡ |
 | **Taille modèle ONNX** | 3.3 MB | 📦 |
 | **Inférence web** | <100ms | 🚀 |
@@ -68,7 +70,7 @@ pip install onnxruntime  # Optionnel pour tests ONNX
 
 **Option A: Jupyter Notebook (Recommandé)**
 ```bash
-jupyter notebook MNIST_Training.ipynb
+jupyter notebook MNIST_Training_clean.ipynb
 # Exécutez toutes les cellules séquentiellement
 ```
 
@@ -83,13 +85,13 @@ python export_onnx_simple.py
 
 **Lancement automatique via notebook:**
 - La dernière cellule du notebook lance automatiquement l'interface
-- Cliquez sur le lien généré : `http://localhost:8000/web/`
+- Cliquez sur le lien généré : `http://localhost:8000/`
 
 **Lancement manuel:**
 ```bash
 # Depuis la racine du projet
 python -m http.server 8000
-# Ouvrez: http://localhost:8000/web/
+# Ouvrez: http://localhost:8000/
 ```
 
 ## 🌐 Interface web
@@ -129,8 +131,8 @@ MNISTNet(
 
 - **Optimizer** : Adam (lr=0.001)
 - **Loss function** : CrossEntropyLoss
-- **Batch size** : 64
-- **Epochs** : 5 
+- **Batch size** : 128
+- **Epochs** : 10 
 - **Dropout** : 0.5
 - **Data augmentation** : Normalisation MNIST standard
 
@@ -158,7 +160,7 @@ Le notebook génère automatiquement :
 
 | Fichier | Description | Taille |
 |---------|-------------|--------|
-| `MNIST_Training.ipynb` | 📓 Notebook principal complet | ~42KB |
+| `MNIST_Training_clean.ipynb` | 📓 Notebook principal complet | ~42KB |
 | `web/index.html` | 🌐 Interface web interactive | ~17KB |
 | `web/mnist_model.onnx` | 🤖 Modèle exporté pour le web | 3.3MB |
 | `models/mnist_model_best.pth` | 💾 Meilleur modèle PyTorch | 9.8MB |
@@ -180,15 +182,15 @@ python -m http.server 8000 --directory web
 
 ### 🔄 Modifications du modèle
 
-1. Modifiez l'architecture dans `MNISTNet` (notebook cellule 3)
-2. Réentraînez le modèle (cellules 12+)
-3. Exportez vers ONNX (cellule 16)
+1. Modifiez l'architecture dans `MNISTNet` (notebook cellule 2)
+2. Réentraînez le modèle (cellules 8+)
+3. Exportez vers ONNX (cellule 5)
 4. Testez l'interface web
 
 ## 🎉 Résultats
 
 ✅ **Objectifs atteints :**
-- Précision >95% sur le dataset de test MNIST
+- Précision >98% sur le dataset de test MNIST (grâce au batch size optimisé)
 - Interface web fonctionnelle avec prédictions temps réel
 - Export ONNX réussi pour déploiement navigateur
 - Code bien documenté et reproductible
