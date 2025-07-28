@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificateur MNIST - IA de reconnaissance de chiffres</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .canvas-container {
+            margin: 30px 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        #drawingCanvas {
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            cursor: crosshair;
+            background: #f9f9f9;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            margin: 30px 0;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .prediction-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .prediction-result {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .confidence {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .probabilities {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .prob-item {
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .prob-item.best {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .prob-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .prob-percent {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            #drawingCanvas {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .probabilities {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Classificateur MNIST</h1>
+        <p class="subtitle">Intelligence Artificielle de reconnaissance de chiffres manuscrits</p>
+
+        <div class="instructions">
+            <h3>📝 Instructions</h3>
+            <p>Dessinez un chiffre (0-9) dans la zone ci-dessous avec votre souris ou votre doigt. L'IA analysera votre dessin et prédira le chiffre en temps réel.</p>
+        </div>
+
+        <div id="status" class="status loading">
+            🔄 Chargement du modèle IA...
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="drawingCanvas" width="280" height="280"></canvas>
+        </div>
+
+        <div class="controls">
+            <button id="clearBtn">🗑️ Effacer</button>
+        </div>
+
+        <div id="predictionSection" class="prediction-section" style="display: none;">
+            <div class="prediction-result" id="predictionResult">-</div>
+            <div class="confidence" id="confidenceText">Confiance: -</div>
+            
+            <div class="probabilities" id="probabilities">
+                <!-- Les probabilités seront ajoutées ici par JavaScript -->
+            </div>
+        </div>
+
+        <div class="loading" id="loadingSpinner">
+            <div class="loading-spinner"></div>
+            <p>Analyse en cours...</p>
+        </div>
+    </div>
+
+    <!-- ONNX Runtime Web -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@latest/dist/ort.min.js"></script>
+    
+    <script>
+        class MNISTClassifier {
+            constructor() {
+                this.session = null;
+                this.canvas = document.getElementById('drawingCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isDrawing = false;
+                this.lastX = 0;
+                this.lastY = 0;
+                
+                this.initCanvas();
+                this.initButtons();
+                this.loadModel();
+            }
+
+            initCanvas() {
+                // Configuration du canvas
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                this.ctx.strokeStyle = '#000';
+                this.ctx.lineWidth = 15;
+                this.ctx.fillStyle = '#fff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Événements souris
+                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+                this.canvas.addEventListener('mouseout', () => this.stopDrawing());
+
+                // Événements tactiles
+                this.canvas.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousedown', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+
+                this.canvas.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const mouseEvent = new MouseEvent('mousemove', {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    });
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+
+                this.canvas.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    const mouseEvent = new MouseEvent('mouseup', {});
+                    this.canvas.dispatchEvent(mouseEvent);
+                });
+            }
+
+            initButtons() {
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.clearCanvas();
+                });
+            }
+
+            startDrawing(e) {
+                this.isDrawing = true;
+                const rect = this.canvas.getBoundingClientRect();
+                this.lastX = e.clientX - rect.left;
+                this.lastY = e.clientY - rect.top;
+            }
+
+            draw(e) {
+                if (!this.isDrawing) return;
+
+                const rect = this.canvas.getBoundingClientRect();
+                const currentX = e.clientX - rect.left;
+                const currentY = e.clientY - rect.top;
+
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.lastX, this.lastY);
+                this.ctx.lineTo(currentX, currentY);
+                this.ctx.stroke();
+
+                this.lastX = currentX;
+                this.lastY = currentY;
+
+                // Auto-prédiction si le modèle est chargé
+                if (this.session) {
+                    clearTimeout(this.autoPredict);
+                    this.autoPredict = setTimeout(() => this.predict(), 500);
+                }
+            }
+
+            stopDrawing() {
+                this.isDrawing = false;
+            }
+
+            clearCanvas() {
+                this.ctx.fillStyle = '#fff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                document.getElementById('predictionSection').style.display = 'none';
+            }
+
+            async loadModel() {
+                try {
+                    document.getElementById('status').textContent = '🔄 Chargement du modèle IA...';
+                    document.getElementById('status').className = 'status loading';
+
+                    // Chargement du modèle ONNX
+                    this.session = await ort.InferenceSession.create('./mnist_model.onnx');
+                    
+                    document.getElementById('status').textContent = '✅ Modèle IA chargé et prêt!';
+                    document.getElementById('status').className = 'status ready';
+
+                    console.log('Modèle ONNX chargé avec succès');
+                } catch (error) {
+                    console.error('Erreur lors du chargement du modèle:', error);
+                    document.getElementById('status').textContent = '❌ Erreur: Modèle ONNX non trouvé. Veuillez d\'abord entraîner le modèle.';
+                    document.getElementById('status').className = 'status error';
+                }
+            }
+
+            preprocessImage() {
+                // Créer un canvas temporaire 28x28
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 28;
+                tempCanvas.height = 28;
+                const tempCtx = tempCanvas.getContext('2d');
+
+                // Redimensionner l'image
+                tempCtx.drawImage(this.canvas, 0, 0, 28, 28);
+
+                // Obtenir les données d'image
+                const imageData = tempCtx.getImageData(0, 0, 28, 28);
+                const data = imageData.data;
+
+                // Convertir en niveaux de gris et normaliser
+                const input = new Float32Array(1 * 1 * 28 * 28);
+                for (let i = 0; i < 28 * 28; i++) {
+                    // Convertir RGBA en niveaux de gris
+                    const idx = i * 4;
+                    const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
+                    
+                    // Normaliser (0-255 -> 0-1) puis appliquer la normalisation MNIST
+                    const normalized = gray / 255.0;
+                    const mnistNorm = (normalized - 0.1307) / 0.3081;
+                    
+                    // Inverser pour que le fond soit noir et l'écriture blanche (comme MNIST)
+                    input[i] = -mnistNorm;
+                }
+
+                return input;
+            }
+
+            async predict() {
+                if (!this.session) {
+                    alert('Le modèle n\'est pas encore chargé!');
+                    return;
+                }
+
+                try {
+                    document.getElementById('loadingSpinner').style.display = 'block';
+
+                    // Préprocesser l'image
+                    const input = this.preprocessImage();
+
+                    // Créer le tenseur d'entrée
+                    const inputTensor = new ort.Tensor('float32', input, [1, 1, 28, 28]);
+
+                    // Faire la prédiction
+                    const results = await this.session.run({ input: inputTensor });
+                    const output = results[Object.keys(results)[0]];
+
+                    // Traiter les résultats
+                    this.displayResults(output.data);
+
+                } catch (error) {
+                    console.error('Erreur lors de la prédiction:', error);
+                    alert('Erreur lors de la prédiction: ' + error.message);
+                } finally {
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                }
+            }
+
+            displayResults(probabilities) {
+                // Appliquer softmax pour obtenir des probabilités
+                const exp_values = Array.from(probabilities).map(x => Math.exp(x));
+                const sum_exp = exp_values.reduce((a, b) => a + b, 0);
+                const softmax_probs = exp_values.map(x => x / sum_exp);
+
+                // Trouver la prédiction avec la plus haute probabilité
+                const maxIndex = softmax_probs.indexOf(Math.max(...softmax_probs));
+                const confidence = softmax_probs[maxIndex];
+
+                // Afficher la prédiction principale
+                document.getElementById('predictionResult').textContent = maxIndex;
+                document.getElementById('confidenceText').textContent = 
+                    `Confiance: ${(confidence * 100).toFixed(1)}%`;
+
+                // Afficher toutes les probabilités
+                const probContainer = document.getElementById('probabilities');
+                probContainer.innerHTML = '';
+
+                for (let i = 0; i < 10; i++) {
+                    const probItem = document.createElement('div');
+                    probItem.className = `prob-item ${i === maxIndex ? 'best' : ''}`;
+                    probItem.innerHTML = `
+                        <div class="prob-number">${i}</div>
+                        <div class="prob-percent">${(softmax_probs[i] * 100).toFixed(1)}%</div>
+                    `;
+                    probContainer.appendChild(probItem);
+                }
+
+                document.getElementById('predictionSection').style.display = 'block';
+            }
+        }
+
+        // Initialiser l'application
+        window.addEventListener('DOMContentLoaded', () => {
+            new MNISTClassifier();
+        });
+    </script>
+</body>
+</html> 

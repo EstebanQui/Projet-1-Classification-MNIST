@@ -1,0 +1,64 @@
+# Fichiers système et temporaires
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Environnements virtuels Python
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Modèles PyTorch lourds (>100MB)
+*.pth
+models/*.pth
+
+# Données MNIST originales (peuvent être retéléchargées)
+data/*.gz
+data/*.idx*-ubyte
+
+# Fichiers IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Windows
+*.lnk
+desktop.ini
+
+# Logs et caches
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ne pas ignorer les fichiers nécessaires au web
+!web/mnist_model.onnx
+!web/index.html
+
+# Ignorer les sauvegardes et fichiers temporaires
+*.bak
+*.orig
+*.rej 
