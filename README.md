@@ -12,7 +12,7 @@
 
 > **📝 Note** : Ce projet utilise maintenant `MNIST_Training_clean.ipynb` - version optimisée avec hyperparamètres améliorés pour une meilleure accuracy.
 
-[🚀 Démo Live](#interface-web) • [📊 Performances](#performances) • [🛠️ Installation](#installation) • [📖 Documentation](#documentation)
+[🚀 Démo Live](https://estebanqui.github.io/Projet-1-Classification-MNIST/index.html)
 
 </div>
 
