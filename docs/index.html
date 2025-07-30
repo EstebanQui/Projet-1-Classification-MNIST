@@ -421,7 +421,7 @@
                     const mnistNorm = (normalized - 0.1307) / 0.3081;
                     
                     // Inverser pour que le fond soit noir et l'écriture blanche (comme MNIST)
-                    input[i] = -mnistNorm;
+                    input[i] = 1 - mnistNorm;
                 }
 
                 return input;
