@@ -64,6 +64,7 @@ Projet_1_Classification_MNIST/
 # Python 3.8+ avec les packages
 pip install torch torchvision numpy matplotlib requests jupyter
 pip install onnxruntime  # Optionnel pour tests ONNX
+pip install tensorboard  # Pour les visualisations avancées
 ```
 
 ### 2️⃣ Entraînement du modèle
@@ -110,6 +111,76 @@ python -m http.server 8000
 - ✅ **Design moderne** : Interface intuitive et responsive
 - ✅ **Offline après chargement** : Aucun serveur externe requis
 
+## 📊 Visualisation avec TensorBoard
+
+### 🚀 Remplacement de Matplotlib
+
+Ce projet intègre maintenant **TensorBoard** pour remplacer les graphiques matplotlib statiques par une interface web interactive et en temps réel.
+
+### 📈 Avantages de TensorBoard
+
+- 🔄 **Temps réel** : Visualisation en direct pendant l'entraînement
+- 🎛️ **Interactivité** : Zoom, filtrage, comparaison d'expériences
+- 📊 **Métriques avancées** : Histogrammes, distributions, gradients
+- 🌐 **Interface web** : Accessible depuis n'importe quel navigateur
+- 📱 **Responsive** : Fonctionne sur desktop et mobile
+
+### 🛠️ Utilisation
+
+#### 1. Entraînement avec TensorBoard
+```bash
+python scripts/mnist_tensorboard_training.py
+```
+
+#### 2. Lancement de TensorBoard
+```bash
+# Option A : Script Windows optimisé (recommandé)
+python scripts/launch_tensorboard_windows.py
+
+# Option B : Script automatique
+python scripts/launch_tensorboard.py
+
+# Option C : Commande manuelle
+python -m tensorboard.main --logdir=runs --port=6006
+```
+
+#### 3. Test de l'intégration
+```bash
+python scripts/test_tensorboard.py
+```
+
+### 📋 Métriques disponibles
+
+- **Loss d'entraînement** : Évolution de la perte par batch et par époque
+- **Accuracy d'entraînement** : Précision sur les données d'entraînement
+- **Loss de test** : Évolution de la perte sur les données de test
+- **Accuracy de test** : Précision sur les données de test
+- **Différence Train-Test** : Détection automatique du surapprentissage
+- **Histogrammes des paramètres** : Distribution des poids et biais
+- **Distribution des gradients** : Analyse de l'optimisation
+
+### 📁 Structure des logs
+
+```
+runs/
+├── mnist_experiment_20241201_143022/
+│   ├── events.out.tfevents.1701430222.hostname
+│   └── ...
+└── ...
+```
+
+### 🔧 Configuration
+
+Le fichier `scripts/config_tensorboard.py` permet de personnaliser :
+- Intervalles de logging
+- Métriques à afficher
+- Paramètres du serveur
+- Options de visualisation
+
+### 📚 Documentation
+
+Consultez `docs/TENSORBOARD_GUIDE.md` pour un guide complet d'utilisation.
+
 ## 🤖 Modèle CNN
 
 ### 🏗️ Architecture
@@ -154,7 +225,7 @@ Le notebook génère automatiquement :
 | **Web Runtime** | ONNX.js | Latest |
 | **Frontend** | Vanilla JS | ES6+ |
 | **Styling** | CSS3 | Modern |
-| **Data Viz** | Matplotlib | 3.x |
+| **Data Viz** | Matplotlib + TensorBoard | 3.x + Latest |
 
 ## 📁 Fichiers importants
 
@@ -164,6 +235,11 @@ Le notebook génère automatiquement :
 | `web/index.html` | 🌐 Interface web interactive | ~17KB |
 | `web/mnist_model.onnx` | 🤖 Modèle exporté pour le web | 3.3MB |
 | `models/mnist_model_best.pth` | 💾 Meilleur modèle PyTorch | 9.8MB |
+| `scripts/mnist_tensorboard_training.py` | 🚀 Entraînement avec TensorBoard | ~15KB |
+| `scripts/launch_tensorboard.py` | 📊 Lanceur TensorBoard automatique | ~8KB |
+| `scripts/launch_tensorboard_windows.py` | 🪟 Lanceur Windows optimisé | ~12KB |
+| `docs/TENSORBOARD_GUIDE.md` | 📚 Guide complet TensorBoard | ~12KB |
+| `docs/TROUBLESHOOTING.md` | 🔧 Guide de dépannage | ~8KB |
 
 ## 🔧 Développement
 

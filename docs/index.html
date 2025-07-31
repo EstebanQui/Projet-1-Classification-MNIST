@@ -378,24 +378,24 @@
 
             async loadModel() {
                 try {
-                    document.getElementById('status').textContent = '🔄 Chargement du modèle IA...';
+                    document.getElementById('status').textContent = 'Chargement du modèle IA...';
                     document.getElementById('status').className = 'status loading';
 
                     // Chargement du modèle ONNX
                     this.session = await ort.InferenceSession.create('./mnist_model.onnx');
                     
-                    document.getElementById('status').textContent = '✅ Modèle IA chargé et prêt!';
+                    document.getElementById('status').textContent = 'Modèle IA chargé et prêt!';
                     document.getElementById('status').className = 'status ready';
 
                     console.log('Modèle ONNX chargé avec succès');
                 } catch (error) {
                     console.error('Erreur lors du chargement du modèle:', error);
-                    document.getElementById('status').textContent = '❌ Erreur: Modèle ONNX non trouvé. Veuillez d\'abord entraîner le modèle.';
+                    document.getElementById('status').textContent = 'Erreur: Modèle ONNX non trouvé. Veuillez d\'abord entraîner le modèle.';
                     document.getElementById('status').className = 'status error';
                 }
             }
 
-            preprocessImage() {
+                        preprocessImage() {
                 // Créer un canvas temporaire 28x28
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = 28;
@@ -415,13 +415,15 @@
                     // Convertir RGBA en niveaux de gris
                     const idx = i * 4;
                     const gray = (data[idx] + data[idx + 1] + data[idx + 2]) / 3;
-                    
-                    // Normaliser (0-255 -> 0-1) puis appliquer la normalisation MNIST
+
+                    // Normaliser (0-255 -> 0-1)
                     const normalized = gray / 255.0;
+                    
+                    // Appliquer la normalisation MNIST standard
                     const mnistNorm = (normalized - 0.1307) / 0.3081;
                     
-                    // Inverser pour que le fond soit noir et l'écriture blanche (comme MNIST)
-                    input[i] = 1 - mnistNorm;
+                    
+                    input[i] = mnistNorm;
                 }
 
                 return input;
